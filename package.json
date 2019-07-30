@@ -18,6 +18,7 @@
   "homepage": "https://github.com/JanielTertuliano/video-maker#readme",
   "dependencies": {
     "algorithmia": "^0.3.10",
+    "express": "^4.16.4",
     "gm": "^1.23.1",
     "googleapis": "^41.0.1",
     "image-downloader": "^3.4.2",
