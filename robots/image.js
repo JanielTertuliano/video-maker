@@ -2,11 +2,11 @@ const imageDownload = require('image-downloader');
 const state = require('./state.js');
 const google = require('googleapis').google;
 const customSearch = google.customsearch('v1');
-
 const googleSearchCredentials = require('../credentials/google-search.json');
 
 async function robot() {
     const content = state.load();
+    console.log('> [image-robot] Starting...')
 
     await fetchImagesOgAllSentences(content);
     await downloadAllImages(content);
@@ -69,7 +69,6 @@ async function robot() {
             dest: `./content/${fileName}`
         })
     }
-
 }
 
 module.exports = robot
