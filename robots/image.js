@@ -3,14 +3,16 @@ const state = require('./state.js');
 const google = require('googleapis').google;
 const customSearch = google.customsearch('v1');
 const googleSearchCredentials = require('../credentials/google-search.json');
+const logger = require('../utils/logger');
 
 async function robot() {
     const content = state.load();
-    console.log('> [image-robot] Starting...')
+    logger.loading('> [image-robot] Starting... ');
 
     await fetchImagesOgAllSentences(content);
     await downloadAllImages(content);
 
+    logger.succeed('> [image-robot] Completed! ');
     state.save(content);
 
     async function fetchImagesOgAllSentences(content) {
@@ -46,6 +48,7 @@ async function robot() {
 
             for (let imageIndex = 0; imageIndex < images.length; imageIndex ++) {
                 const imageUrl = images[imageIndex];
+                logger.loading('Image Download...');
 
                 try {
                     if (content.downloadedImages.includes(imageUrl)) {
@@ -54,10 +57,11 @@ async function robot() {
 
                     await downloadAndSave(imageUrl, `${sentenceIndex}-original.png`);
                     content.downloadedImages.push(imageUrl);
-                    console.log('Image successfully downloaded: ', imageUrl);
+                    logger.succeed('Image successfully downloaded: '+ imageUrl);
+
                     break;
                 } catch (error) {
-                    console.log('error ao baixar imagem', error);
+                    logger.error('error ao baixar imagem' + error);
                 }
             }
         }

@@ -4,7 +4,8 @@ const sentenceBoundaryDetection = require('sbd');
 
 const watsonApiKey = require('../credentials/watson-nlu.json').apikey;
 const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
- 
+const logger = require('../utils/logger');
+
 const nlu = new NaturalLanguageUnderstandingV1({
   iam_apikey: watsonApiKey,
   version: '2018-04-05',
@@ -15,6 +16,7 @@ const state = require('./state.js');
 
 async function robot() {
     const content = state.load();
+    logger.loading('> [text-robot] Starting... ');
 
     await fetchContentFromWikipedia(content);
     sanitizeContent(content);
@@ -22,9 +24,12 @@ async function robot() {
     limitMaximumSentences(content);
     await fetchKeywordsOfAllSentences(content);
 
+    logger.succeed('> [text-robot] Completed! ');
     state.save(content);
 
     async function fetchContentFromWikipedia(content) {
+        logger.info('> Buscando conteúdo da Wikipedia');
+
         const algorithmiaAuthenticated = algorithmia(apiKey);
         const wikipediaAlgorithm = algorithmiaAuthenticated.algo('web/WikipediaParser/0.1.2?timeout=300');
         const wikipediaResponse = await wikipediaAlgorithm.pipe({  
@@ -37,6 +42,8 @@ async function robot() {
     }
 
     function sanitizeContent(content) {
+        logger.info('> Limpando conteúdo buscado');
+
         const withoutBlankLinesAndMarkdown = removeBlankLinesAndMarkdown(content.sourceContentOriginal);
         const withoutDatesInParentheses = removeDatesInParentheses(withoutBlankLinesAndMarkdown);
       
@@ -62,6 +69,8 @@ async function robot() {
     }
 
     function breakContentIntoSentences(content) {
+        logger.info('> Quebrando o conteúdo em frases');
+
         content.sentences = [];
         const sentences = sentenceBoundaryDetection.sentences(content.sourceContentSanitized);
         sentences.forEach((sentence) => {
@@ -84,6 +93,8 @@ async function robot() {
     }
 
     async function fetchWatsonAndReturnKeywords(sentence) {
+        logger.loading('> Buscando no Watson e retornando palavras-chave');
+
         return new Promise((resolve, reject) => {
             nlu.analyze({
                 text: sentence,
@@ -92,6 +103,7 @@ async function robot() {
                 }
             }, (error, response) => {
                 if(error) {
+                    logger.error(error);
                     throw error
                 }
 
@@ -99,6 +111,7 @@ async function robot() {
                   return keyword.text;
               });
 
+              logger.succeed('Completed');
               resolve(keywords);
             })
         });
