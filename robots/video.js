@@ -12,8 +12,8 @@ async function robot() {
     await convertAllImages(content);
     await createAllSentenceImages(content);
     await createYouTubeThumbnail(content);
-    // await createAfterEffectsScript(content);
-    // await renderVideoWithAfterEffects();
+    await createAfterEffectsScript(content);
+    await renderVideoWithAfterEffects();
 
     logger.succeed('> [video-robot] Completed! ');
     state.save(content);
