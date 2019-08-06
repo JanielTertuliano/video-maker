@@ -170,7 +170,7 @@ async function robot() {
             })
 
             aerender.on('close', () => {
-                logger.succeed('> [video-robot] After Effects closed')
+                logger.succeed('> [video-robot] After Effects closed');
                 resolve();
             })
         })
